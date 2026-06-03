@@ -10,7 +10,7 @@ const state = {
   selectedType: null,
   premiseCount: 2,
   subPremiseCount: 1,
-  recentSymbols: JSON.parse(localStorage.getItem("philo_recent_syms") || "[]"),
+  recentSymbols: [],
 };
 
 /* ─── Block metadata ─────────────────────── */
@@ -356,7 +356,7 @@ async function insertSymbol(sym, btn) {
 
 function addRecentSymbol(sym, name) {
   state.recentSymbols = [{ sym, name }, ...state.recentSymbols.filter(s => s.sym !== sym)].slice(0, 12);
-  localStorage.setItem("philo_recent_syms", JSON.stringify(state.recentSymbols));
+  
   renderRecentSymbols();
 }
 
