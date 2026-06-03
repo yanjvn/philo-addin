@@ -10,80 +10,25 @@
   <ProviderName>PhilosophyTools</ProviderName>
   <DefaultLocale>ko-KR</DefaultLocale>
 
-  <DisplayName DefaultValue="PhiloArgument — 논증 작성 도구"/>
+  <DisplayName DefaultValue="PhiloArgument"/>
   <Description DefaultValue="분석철학 논문 작성을 위한 논증 구조화 도구"/>
+
+  <IconUrl DefaultValue="https://stellar-ganache-b5b9d2.netlify.app/assets/icon-32.png"/>
+  <HighResolutionIconUrl DefaultValue="https://stellar-ganache-b5b9d2.netlify.app/assets/icon-80.png"/>
+  <SupportUrl DefaultValue="https://stellar-ganache-b5b9d2.netlify.app"/>
+
+  <AppDomains>
+    <AppDomain>https://yanjvn.github.io</AppDomain>
+  </AppDomains>
 
   <Hosts>
     <Host Name="Document"/>
   </Hosts>
 
   <DefaultSettings>
-    <SourceLocation DefaultValue="https://yanjvn.github.io/philo-addin/taskpane.html"/>
+    <SourceLocation DefaultValue="https://stellar-ganache-b5b9d2.netlify.app/taskpane.html"/>
   </DefaultSettings>
 
   <Permissions>ReadWriteDocument</Permissions>
 
-  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
-    <Hosts>
-      <Host xsi:type="Document">
-        <DesktopFormFactor>
-          <GetStarted>
-            <Title resid="GetStarted.Title"/>
-            <Description resid="GetStarted.Description"/>
-            <LearnMoreUrl resid="GetStarted.LearnMoreUrl"/>
-          </GetStarted>
-          <FunctionFile resid="Commands.Url"/>
-          <ExtensionPoint xsi:type="PrimaryCommandSurface">
-            <OfficeTab id="TabHome">
-              <Group id="CommandsGroup">
-                <Label resid="CommandsGroup.Label"/>
-                <Icon>
-                  <bt:Image size="16" resid="Icon.16x16"/>
-                  <bt:Image size="32" resid="Icon.32x32"/>
-                  <bt:Image size="80" resid="Icon.80x80"/>
-                </Icon>
-                <Control xsi:type="Button" id="TaskpaneButton">
-                  <Label resid="TaskpaneButton.Label"/>
-                  <Supertip>
-                    <Title resid="TaskpaneButton.Label"/>
-                    <Description resid="TaskpaneButton.Tooltip"/>
-                  </Supertip>
-                  <Icon>
-                    <bt:Image size="16" resid="Icon.16x16"/>
-                    <bt:Image size="32" resid="Icon.32x32"/>
-                    <bt:Image size="80" resid="Icon.80x80"/>
-                  </Icon>
-                  <Action xsi:type="ShowTaskpane">
-                    <TaskpaneId>ButtonId1</TaskpaneId>
-                    <SourceLocation resid="Taskpane.Url"/>
-                  </Action>
-                </Control>
-              </Group>
-            </OfficeTab>
-          </ExtensionPoint>
-        </DesktopFormFactor>
-      </Host>
-    </Hosts>
-    <Resources>
-      <bt:Images>
-        <bt:Image id="Icon.16x16" DefaultValue="https://yanjvn.github.io/philo-addin/assets/icon-16.png"/>
-        <bt:Image id="Icon.32x32" DefaultValue="https://yanjvn.github.io/philo-addin/assets/icon-32.png"/>
-        <bt:Image id="Icon.80x80" DefaultValue="https://yanjvn.github.io/philo-addin/assets/icon-80.png"/>
-      </bt:Images>
-      <bt:Urls>
-        <bt:Url id="GetStarted.LearnMoreUrl" DefaultValue="https://go.microsoft.com/fwlink/?LinkId=276812"/>
-        <bt:Url id="Commands.Url" DefaultValue="https://yanjvn.github.io/philo-addin/commands.html"/>
-        <bt:Url id="Taskpane.Url" DefaultValue="https://yanjvn.github.io/philo-addin/taskpane.html"/>
-      </bt:Urls>
-      <bt:ShortStrings>
-        <bt:String id="GetStarted.Title" DefaultValue="PhiloArgument 시작하기"/>
-        <bt:String id="CommandsGroup.Label" DefaultValue="논증 도구"/>
-        <bt:String id="TaskpaneButton.Label" DefaultValue="논증 패널 열기"/>
-        <bt:String id="TaskpaneButton.Tooltip" DefaultValue="논증 구조화 패널을 엽니다"/>
-      </bt:ShortStrings>
-      <bt:LongStrings>
-        <bt:String id="GetStarted.Description" DefaultValue="분석철학 논문 작성을 위한 논증 도구입니다."/>
-      </bt:LongStrings>
-    </Resources>
-  </VersionOverrides>
 </OfficeApp>
