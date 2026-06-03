@@ -4,7 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>PhiloArgument</title>
-  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
   <style>
     *{box-sizing:border-box;margin:0;padding:0}
     body{font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;color:#1a1a1a;background:#fff}
@@ -84,12 +84,12 @@
   <div class="sec-title">논증 블록 삽입</div>
   <div class="sec-desc">유형을 선택하고 내용을 입력한 뒤 삽입하세요.</div>
   <div class="btype-grid">
-    <div class="btype" data-t="claim" onclick="pickType(this)"><div class="dot" style="background:#2e7dd6"></div><div class="bl">주장</div><div class="bs">Claim</div></div>
-    <div class="btype" data-t="premise" onclick="pickType(this)"><div class="dot" style="background:#3a9464"></div><div class="bl">전제</div><div class="bs">Premise</div></div>
-    <div class="btype" data-t="support" onclick="pickType(this)"><div class="dot" style="background:#7c52b8"></div><div class="bl">근거</div><div class="bs">Support</div></div>
-    <div class="btype" data-t="objection" onclick="pickType(this)"><div class="dot" style="background:#c85040"></div><div class="bl">반론</div><div class="bs">Objection</div></div>
-    <div class="btype" data-t="reply" onclick="pickType(this)"><div class="dot" style="background:#c49030"></div><div class="bl">재반론</div><div class="bs">Reply</div></div>
-    <div class="btype" data-t="remark" onclick="pickType(this)"><div class="dot" style="background:#888"></div><div class="bl">논평</div><div class="bs">Remark</div></div>
+    <div class="btype" data-t="claim" onclick="selType(this)"><div class="dot" style="background:#2e7dd6"></div><div class="bl">주장</div><div class="bs">Claim</div></div>
+    <div class="btype" data-t="premise" onclick="selType(this)"><div class="dot" style="background:#3a9464"></div><div class="bl">전제</div><div class="bs">Premise</div></div>
+    <div class="btype" data-t="support" onclick="selType(this)"><div class="dot" style="background:#7c52b8"></div><div class="bl">근거</div><div class="bs">Support</div></div>
+    <div class="btype" data-t="objection" onclick="selType(this)"><div class="dot" style="background:#c85040"></div><div class="bl">반론</div><div class="bs">Objection</div></div>
+    <div class="btype" data-t="reply" onclick="selType(this)"><div class="dot" style="background:#c49030"></div><div class="bl">재반론</div><div class="bs">Reply</div></div>
+    <div class="btype" data-t="remark" onclick="selType(this)"><div class="dot" style="background:#888"></div><div class="bl">논평</div><div class="bs">Remark</div></div>
   </div>
   <label class="lbl">레이블 (선택)</label>
   <input type="text" id="lbl" placeholder="예: C1, P2 …"/>
@@ -249,7 +249,7 @@ function goTab(id, btn) {
 }
 
 // ── 블록 유형 선택
-function pickType(el) {
+function selType(el) {
   document.querySelectorAll('.btype').forEach(function(b){ b.classList.remove('on'); });
   el.classList.add('on');
   selType = el.getAttribute('data-t');
@@ -293,16 +293,24 @@ function doInsert() {
   if (!cont) { showSB('내용을 입력하세요.'); return; }
   var m = COLORS[selType];
   var dlbl = lbl || (selType.charAt(0).toUpperCase() + '?');
-  var fullText = '[' + dlbl + '] ' + m.label + '  ' + cont;
-  if (ce) fullText += '\n⚠ 반례 메모: ' + ce;
+  var mainText = '[' + dlbl + '] ' + m.label + '  ' + cont;
 
   Word.run(function(ctx) {
     var sel = ctx.document.getSelection();
-    var para = sel.insertParagraph(fullText, Word.InsertLocation.after);
+    var para = sel.insertParagraph(mainText, Word.InsertLocation.after);
     para.leftIndent = 18;
-    para.spaceAfter = 6;
+    para.spaceAfter = 2;
     para.spaceBefore = 6;
     para.font.size = 11;
+    para.font.color = m.color;
+    if (ce) {
+      var cePara = para.insertParagraph('⚠ 반례 메모: ' + ce, Word.InsertLocation.after);
+      cePara.leftIndent = 36;
+      cePara.spaceBefore = 0;
+      cePara.spaceAfter = 8;
+      cePara.font.size = 10;
+      cePara.font.italic = true;
+    }
     return ctx.sync().then(function() {
       showSB('"' + dlbl + '" 블록이 삽입되었습니다.');
     });
