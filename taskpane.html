@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PhiloArgument</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1.1/hosted/office.js"></script>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;color:#1a1a1a;background:#fff}
+    .header{background:#f5f5f5;border-bottom:1px solid #ddd;padding:8px 10px 0}
+    .logo{font-size:13px;font-weight:700;color:#2e6dcc;margin-bottom:8px}
+    .tabs{display:flex}
+    .tab{background:none;border:none;border-bottom:2px solid transparent;padding:5px 10px 7px;font-size:12px;cursor:pointer;color:#666}
+    .tab.on{color:#2e6dcc;border-bottom-color:#2e6dcc;font-weight:700}
+    .panel{display:none;padding:12px 10px}
+    .panel.on{display:block}
+    .sec-title{font-size:13px;font-weight:700;margin-bottom:3px}
+    .sec-desc{font-size:11px;color:#666;margin-bottom:10px}
+    .lbl{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:#666;margin-bottom:3px;display:block}
+    input[type=text],textarea{width:100%;padding:6px 8px;border:1px solid #bbb;border-radius:4px;font-size:12.5px;font-family:inherit;color:#1a1a1a;background:#fff;margin-bottom:8px}
+    textarea{resize:vertical;min-height:68px}
+    .btype-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:12px}
+    .btype{display:flex;flex-direction:column;align-items:center;gap:3px;padding:7px 3px;border:1.5px solid #ddd;border-radius:5px;background:#f8f8f8;cursor:pointer}
+    .btype.on{border-width:2px}
+    .btype[data-t=claim].on{border-color:#2e7dd6;background:#e8f0fa}
+    .btype[data-t=premise].on{border-color:#3a9464;background:#e6f4ed}
+    .btype[data-t=support].on{border-color:#7c52b8;background:#f0eaf9}
+    .btype[data-t=objection].on{border-color:#c85040;background:#fdecea}
+    .btype[data-t=reply].on{border-color:#c49030;background:#fdf4e3}
+    .btype[data-t=remark].on{border-color:#888;background:#f5f5f5}
+    .dot{width:8px;height:8px;border-radius:50%}
+    .bl{font-size:11px;font-weight:700}
+    .bs{font-size:9.5px;color:#888}
+    .row-btns{display:flex;gap:7px;margin-top:4px}
+    .btn{padding:6px 14px;border-radius:4px;font-size:12px;font-weight:700;cursor:pointer;border:none;font-family:inherit}
+    .btn-p{background:#2e6dcc;color:#fff}
+    .btn-s{background:#f0f0f0;color:#333;border:1px solid #bbb}
+    .btn-ghost{background:none;color:#2e6dcc;font-size:11.5px;padding:4px 8px;cursor:pointer;border:none;font-family:inherit}
+    .btn-full{width:100%;margin-bottom:8px}
+    .ce-box{background:#fff8e6;border:1px dashed #e0a800;border-radius:4px;padding:6px 8px;margin-bottom:8px;font-size:11.5px;color:#7a5c1e}
+    .ce-lbl{font-size:10px;font-weight:700;text-transform:uppercase;color:#c49030;margin-bottom:2px}
+    .preview-wrap{margin-top:10px;border-top:1px solid #eee;padding-top:10px;display:none}
+    .preview-lbl{font-size:10px;font-weight:700;text-transform:uppercase;color:#888;margin-bottom:6px}
+    .prev-block{border-left:3px solid;padding:6px 9px;font-size:12px;line-height:1.5;border-radius:0 4px 4px 0}
+    .prev-block .plbl{font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px}
+    .sym-search{margin-bottom:10px}
+    .sg-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:#888;margin-bottom:5px;border-bottom:1px solid #eee;padding-bottom:3px}
+    .sg{margin-bottom:12px}
+    .sym-grid{display:flex;flex-wrap:wrap;gap:3px}
+    .sym{width:30px;height:30px;background:#f5f5f5;border:1px solid #ddd;border-radius:4px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Cambria Math',serif}
+    .sym:hover{background:#e8f0fa;border-color:#2e7dd6;color:#2e6dcc}
+    .prow{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+    .pnum{font-size:11px;font-weight:700;color:#888;min-width:28px}
+    .conc-row{display:flex;align-items:center;gap:7px;margin-top:8px;padding-top:8px;border-top:1.5px solid #bbb}
+    .conc-sym{font-size:17px;font-weight:700;color:#2d6e4e;min-width:28px;text-align:center}
+    .valid-row{padding:7px 9px;background:#f8f8f8;border:1px solid #ddd;border-radius:4px;margin:8px 0;font-size:11.5px;color:#666}
+    .scan-sum{padding:9px 10px;background:#f8f8f8;border:1px solid #ddd;border-radius:5px;margin-bottom:10px;font-size:12px;line-height:1.6}
+    .iss{display:flex;gap:7px;padding:6px 9px;border-radius:4px;font-size:11.5px;margin-bottom:5px;align-items:flex-start}
+    .iss.warn{background:#fff8e6;border:1px solid #e0a800;color:#7a5c1e}
+    .iss.err{background:#fdecea;border:1px solid #c85040;color:#923a2a}
+    .iss.ok{background:#e6f4ed;border:1px solid #3a9464;color:#2d6e4e}
+    .statusbar{position:fixed;bottom:0;left:0;right:0;background:#f5f5f5;border-top:1px solid #ddd;padding:5px 10px;font-size:11.5px;color:#666;display:none}
+    details{border:1px solid #ddd;border-radius:4px;margin:10px 0;overflow:hidden}
+    details summary{padding:7px 10px;font-size:12px;font-weight:600;cursor:pointer;background:#f8f8f8;color:#666}
+    details > div{padding:10px}
+    .toast{position:fixed;bottom:36px;left:50%;transform:translateX(-50%);background:#222;color:#fff;padding:5px 14px;border-radius:100px;font-size:11.5px;white-space:nowrap;display:none;z-index:999}
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">⬡ PhiloArgument</div>
+  <div class="tabs">
+    <button class="tab on" onclick="goTab('compose',this)">작성</button>
+    <button class="tab" onclick="goTab('formalize',this)">정식화</button>
+    <button class="tab" onclick="goTab('symbols',this)">기호</button>
+    <button class="tab" onclick="goTab('review',this)">검토</button>
+  </div>
+</div>
+
+<!-- 작성 탭 -->
+<div id="tab-compose" class="panel on">
+  <div class="sec-title">논증 블록 삽입</div>
+  <div class="sec-desc">유형을 선택하고 내용을 입력한 뒤 삽입하세요.</div>
+  <div class="btype-grid">
+    <div class="btype" data-t="claim" onclick="pickType(this)"><div class="dot" style="background:#2e7dd6"></div><div class="bl">주장</div><div class="bs">Claim</div></div>
+    <div class="btype" data-t="premise" onclick="pickType(this)"><div class="dot" style="background:#3a9464"></div><div class="bl">전제</div><div class="bs">Premise</div></div>
+    <div class="btype" data-t="support" onclick="pickType(this)"><div class="dot" style="background:#7c52b8"></div><div class="bl">근거</div><div class="bs">Support</div></div>
+    <div class="btype" data-t="objection" onclick="pickType(this)"><div class="dot" style="background:#c85040"></div><div class="bl">반론</div><div class="bs">Objection</div></div>
+    <div class="btype" data-t="reply" onclick="pickType(this)"><div class="dot" style="background:#c49030"></div><div class="bl">재반론</div><div class="bs">Reply</div></div>
+    <div class="btype" data-t="remark" onclick="pickType(this)"><div class="dot" style="background:#888"></div><div class="bl">논평</div><div class="bs">Remark</div></div>
+  </div>
+  <label class="lbl">레이블 (선택)</label>
+  <input type="text" id="lbl" placeholder="예: C1, P2 …"/>
+  <label class="lbl">내용</label>
+  <textarea id="content" placeholder="논증 내용을 입력하세요…"></textarea>
+  <div id="ce-section" style="display:none">
+    <label class="lbl">반례 메모 <span style="background:#fff0c0;color:#8a6500;padding:1px 5px;border-radius:10px;font-size:9px;font-weight:700;text-transform:none;letter-spacing:0">검토 필요</span></label>
+    <textarea id="counterex" placeholder="예상 반례 또는 반론을 메모하세요…" style="min-height:50px"></textarea>
+  </div>
+  <div class="row-btns">
+    <button class="btn btn-p" onclick="doInsert()">문서에 삽입</button>
+    <button class="btn btn-s" onclick="doPreview()">미리보기</button>
+  </div>
+  <div class="preview-wrap" id="preview-wrap">
+    <div class="preview-lbl">미리보기</div>
+    <div id="preview-content"></div>
+  </div>
+</div>
+
+<!-- 정식화 탭 -->
+<div id="tab-formalize" class="panel">
+  <div class="sec-title">정식 논증 레이아웃</div>
+  <div class="sec-desc">P1, P2, ∴C 형식으로 삽입합니다.</div>
+  <label class="lbl">논증 제목 (선택)</label>
+  <input type="text" id="arg-title" placeholder="예: 수반 논증"/>
+  <div id="premises-list">
+    <div class="prow"><span class="pnum">P1</span><input type="text" class="pi" placeholder="첫 번째 전제"/><button class="btn-ghost" onclick="delP(this)">✕</button></div>
+    <div class="prow"><span class="pnum">P2</span><input type="text" class="pi" placeholder="두 번째 전제"/><button class="btn-ghost" onclick="delP(this)">✕</button></div>
+  </div>
+  <button class="btn-ghost" onclick="addP()">+ 전제 추가</button>
+  <div class="conc-row">
+    <span class="conc-sym">∴</span>
+    <input type="text" id="conclusion" placeholder="결론"/>
+  </div>
+  <div class="valid-row" id="valid-row">○ 전제와 결론을 입력하면 형식 점검이 실행됩니다.</div>
+  <div class="row-btns" style="margin-top:10px">
+    <button class="btn btn-p" onclick="doFormal()">정식 논증 삽입</button>
+  </div>
+</div>
+
+<!-- 기호 탭 -->
+<div id="tab-symbols" class="panel">
+  <input type="text" id="sym-search" class="sym-search" placeholder="기호 검색… (예: necessity, 필연)" oninput="filterSym(this.value)"/>
+  <div class="sg" data-g="prop">
+    <div class="sg-title">명제 논리</div>
+    <div class="sym-grid">
+      <button class="sym" data-n="부정 negation not" onclick="insSym('¬')">¬</button>
+      <button class="sym" data-n="연언 conjunction and" onclick="insSym('∧')">∧</button>
+      <button class="sym" data-n="선언 disjunction or" onclick="insSym('∨')">∨</button>
+      <button class="sym" data-n="조건 conditional implication" onclick="insSym('→')">→</button>
+      <button class="sym" data-n="쌍조건 biconditional iff" onclick="insSym('↔')">↔</button>
+      <button class="sym" data-n="조건 horseshoe" onclick="insSym('⊃')">⊃</button>
+      <button class="sym" data-n="동치 equivalence" onclick="insSym('≡')">≡</button>
+      <button class="sym" data-n="항진 tautology top" onclick="insSym('⊤')">⊤</button>
+      <button class="sym" data-n="모순 contradiction bottom" onclick="insSym('⊥')">⊥</button>
+      <button class="sym" data-n="증명가능 provable turnstile" onclick="insSym('⊢')">⊢</button>
+      <button class="sym" data-n="귀결 entailment models" onclick="insSym('⊨')">⊨</button>
+      <button class="sym" data-n="따라서 therefore conclusion" onclick="insSym('∴')">∴</button>
+      <button class="sym" data-n="왜냐하면 because" onclick="insSym('∵')">∵</button>
+    </div>
+  </div>
+  <div class="sg" data-g="pred">
+    <div class="sg-title">술어 논리</div>
+    <div class="sym-grid">
+      <button class="sym" data-n="전칭 universal quantifier forall" onclick="insSym('∀')">∀</button>
+      <button class="sym" data-n="존재 existential quantifier exists" onclick="insSym('∃')">∃</button>
+      <button class="sym" data-n="존재하지않음 none" onclick="insSym('∄')">∄</button>
+      <button class="sym" data-n="원소 element member" onclick="insSym('∈')">∈</button>
+      <button class="sym" data-n="원소아님 not element" onclick="insSym('∉')">∉</button>
+      <button class="sym" data-n="부분집합 subset" onclick="insSym('⊆')">⊆</button>
+      <button class="sym" data-n="진부분집합 proper subset" onclick="insSym('⊂')">⊂</button>
+      <button class="sym" data-n="동일성 identity equals" onclick="insSym('＝')">＝</button>
+      <button class="sym" data-n="비동일성 not equal" onclick="insSym('≠')">≠</button>
+      <button class="sym" data-n="람다 lambda abstraction" onclick="insSym('λ')">λ</button>
+      <button class="sym" data-n="확정기술 definite description iota" onclick="insSym('ι')">ι</button>
+    </div>
+  </div>
+  <div class="sg" data-g="modal">
+    <div class="sg-title">양상 논리</div>
+    <div class="sym-grid">
+      <button class="sym" data-n="필연 necessity box" onclick="insSym('□')">□</button>
+      <button class="sym" data-n="가능 possibility diamond" onclick="insSym('◇')">◇</button>
+      <button class="sym" data-n="인식 knows epistemic" onclick="insSym('K')">K</button>
+      <button class="sym" data-n="믿음 believes doxastic" onclick="insSym('B')">B</button>
+      <button class="sym" data-n="의무 obligation deontic" onclick="insSym('O')">O</button>
+      <button class="sym" data-n="허용 permission deontic" onclick="insSym('P')">P</button>
+      <button class="sym" data-n="금지 forbidden deontic" onclick="insSym('F')">F</button>
+      <button class="sym" data-n="항상 always temporal" onclick="insSym('G')">G</button>
+    </div>
+  </div>
+  <div class="sg" data-g="greek">
+    <div class="sg-title">그리스 문자</div>
+    <div class="sym-grid">
+      <button class="sym" data-n="alpha" onclick="insSym('α')">α</button>
+      <button class="sym" data-n="beta" onclick="insSym('β')">β</button>
+      <button class="sym" data-n="gamma" onclick="insSym('γ')">γ</button>
+      <button class="sym" data-n="delta" onclick="insSym('δ')">δ</button>
+      <button class="sym" data-n="epsilon" onclick="insSym('ε')">ε</button>
+      <button class="sym" data-n="theta" onclick="insSym('θ')">θ</button>
+      <button class="sym" data-n="lambda" onclick="insSym('λ')">λ</button>
+      <button class="sym" data-n="mu" onclick="insSym('μ')">μ</button>
+      <button class="sym" data-n="pi" onclick="insSym('π')">π</button>
+      <button class="sym" data-n="phi" onclick="insSym('φ')">φ</button>
+      <button class="sym" data-n="psi" onclick="insSym('ψ')">ψ</button>
+      <button class="sym" data-n="omega" onclick="insSym('ω')">ω</button>
+      <button class="sym" data-n="Gamma" onclick="insSym('Γ')">Γ</button>
+      <button class="sym" data-n="Delta" onclick="insSym('Δ')">Δ</button>
+      <button class="sym" data-n="Sigma" onclick="insSym('Σ')">Σ</button>
+      <button class="sym" data-n="Phi" onclick="insSym('Φ')">Φ</button>
+      <button class="sym" data-n="Psi" onclick="insSym('Ψ')">Ψ</button>
+      <button class="sym" data-n="Omega" onclick="insSym('Ω')">Ω</button>
+    </div>
+  </div>
+  <div class="sg" data-g="special">
+    <div class="sg-title">특수 기호</div>
+    <div class="sym-grid">
+      <button class="sym" data-n="quine corner left mention" onclick="insSym('⌜')">⌜</button>
+      <button class="sym" data-n="quine corner right mention" onclick="insSym('⌝')">⌝</button>
+      <button class="sym" data-n="xor exclusive disjunction" onclick="insSym('⊕')">⊕</button>
+      <button class="sym" data-n="nand sheffer stroke" onclick="insSym('↑')">↑</button>
+      <button class="sym" data-n="nor peirce" onclick="insSym('↓')">↓</button>
+      <button class="sym" data-n="무한 infinity" onclick="insSym('∞')">∞</button>
+      <button class="sym" data-n="프라임 prime" onclick="insSym('′')">′</button>
+      <button class="sym" data-n="근사 approximate" onclick="insSym('≈')">≈</button>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+</div>
+
+<!-- 검토 탭 -->
+<div id="tab-review" class="panel">
+  <div class="sec-title">논증 구조 검토</div>
+  <div class="sec-desc">문서를 스캔하여 구조 문제를 탐지합니다.</div>
+  <button class="btn btn-p btn-full" onclick="doScan()">문서 스캔</button>
+  <div id="scan-out" style="display:none"></div>
+</div>
+
+<div class="statusbar" id="sb"><span id="sb-text"></span></div>
+
+<script>
+// ── 상태
+var selType = null;
+
+// ── Office 초기화
+Office.onReady(function(info) {
+  // 패널 인풋 이벤트
+  document.getElementById('premises-list').addEventListener('input', checkValid);
+  document.getElementById('conclusion').addEventListener('input', checkValid);
+});
+
+// ── 탭 전환
+function goTab(id, btn) {
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('on'); });
+  document.querySelectorAll('.tab').forEach(function(t){ t.classList.remove('on'); });
+  document.getElementById('tab-'+id).classList.add('on');
+  btn.classList.add('on');
+}
+
+// ── 블록 유형 선택
+function pickType(el) {
+  document.querySelectorAll('.btype').forEach(function(b){ b.classList.remove('on'); });
+  el.classList.add('on');
+  selType = el.getAttribute('data-t');
+  var showCE = selType === 'claim' || selType === 'premise';
+  document.getElementById('ce-section').style.display = showCE ? 'block' : 'none';
+}
+
+// ── 미리보기
+var COLORS = {
+  claim:     {c:'#2e7dd6', bg:'#e8f0fa', label:'주장 (Claim)'},
+  premise:   {c:'#3a9464', bg:'#e6f4ed', label:'전제 (Premise)'},
+  support:   {c:'#7c52b8', bg:'#f0eaf9', label:'근거 (Support)'},
+  objection: {c:'#c85040', bg:'#fdecea', label:'반론 (Objection)'},
+  reply:     {c:'#c49030', bg:'#fdf4e3', label:'재반론 (Reply)'},
+  remark:    {c:'#888',    bg:'#f5f5f5', label:'논평 (Remark)'},
+};
+
+function doPreview() {
+  if (!selType) { showSB('블록 유형을 먼저 선택하세요.'); return; }
+  var lbl  = document.getElementById('lbl').value.trim();
+  var cont = document.getElementById('content').value.trim();
+  var ce   = document.getElementById('counterex').value.trim();
+  if (!cont) { showSB('내용을 입력하세요.'); return; }
+  var m = COLORS[selType];
+  var dlbl = lbl || (selType.charAt(0).toUpperCase() + '?');
+  var html = '<div class="prev-block" style="border-color:'+m.c+';background:'+m.bg+';color:'+m.c+'">'
+    + '<div class="plbl">['+dlbl+'] '+m.label+'</div>'
+    + '<div style="color:#1a1a1a">'+esc(cont)+'</div>';
+  if (ce) html += '<div class="ce-box" style="margin-top:6px"><div class="ce-lbl">⚠ 반례 메모</div>'+esc(ce)+'</div>';
+  html += '</div>';
+  document.getElementById('preview-content').innerHTML = html;
+  document.getElementById('preview-wrap').style.display = 'block';
+}
+
+// ── 블록 삽입
+function doInsert() {
+  if (!selType) { showSB('블록 유형을 먼저 선택하세요.'); return; }
+  var lbl  = document.getElementById('lbl').value.trim();
+  var cont = document.getElementById('content').value.trim();
+  var ce   = document.getElementById('counterex').value.trim();
+  if (!cont) { showSB('내용을 입력하세요.'); return; }
+  var m = COLORS[selType];
+  var dlbl = lbl || (selType.charAt(0).toUpperCase() + '?');
+  var fullText = '[' + dlbl + '] ' + m.label + '  ' + cont;
+  if (ce) fullText += '\n⚠ 반례 메모: ' + ce;
+
+  Word.run(function(ctx) {
+    var sel = ctx.document.getSelection();
+    var para = sel.insertParagraph(fullText, Word.InsertLocation.after);
+    para.leftIndent = 18;
+    para.spaceAfter = 6;
+    para.spaceBefore = 6;
+    para.font.size = 11;
+    return ctx.sync().then(function() {
+      showSB('"' + dlbl + '" 블록이 삽입되었습니다.');
+    });
+  }).catch(function(e) { showSB('오류: ' + e.message); });
+}
+
+// ── 정식 논증 삽입
+function doFormal() {
+  var title = document.getElementById('arg-title').value.trim();
+  var ps = [];
+  document.querySelectorAll('#premises-list .pi').forEach(function(i){ if(i.value.trim()) ps.push(i.value.trim()); });
+  var conc = document.getElementById('conclusion').value.trim();
+  if (!ps.length || !conc) { showSB('전제와 결론을 모두 입력하세요.'); return; }
+
+  Word.run(function(ctx) {
+    var sel = ctx.document.getSelection();
+    if (title) {
+      var tp = sel.insertParagraph(title, Word.InsertLocation.after);
+      tp.font.size = 11;
+      tp.spaceBefore = 10;
+      tp.spaceAfter = 4;
+    }
+    ps.forEach(function(p, i) {
+      var pp = sel.insertParagraph('P'+(i+1)+'.  '+p, Word.InsertLocation.after);
+      pp.font.size = 11;
+      pp.leftIndent = 24;
+      pp.spaceBefore = 2;
+      pp.spaceAfter = 2;
+    });
+    var sep = sel.insertParagraph('────────────────────', Word.InsertLocation.after);
+    sep.leftIndent = 24;
+    sep.font.size = 8;
+    var cp = sel.insertParagraph('∴  '+conc, Word.InsertLocation.after);
+    cp.font.size = 11;
+    cp.leftIndent = 24;
+    cp.spaceBefore = 4;
+    cp.spaceAfter = 10;
+    return ctx.sync().then(function() { showSB('정식 논증이 삽입되었습니다.'); });
+  }).catch(function(e) { showSB('오류: ' + e.message); });
+}
+
+// ── 전제 추가/삭제
+var pCount = 2;
+function addP() {
+  pCount++;
+  var div = document.createElement('div');
+  div.className = 'prow';
+  div.innerHTML = '<span class="pnum">P'+pCount+'</span><input type="text" class="pi" placeholder="'+pCount+'번째 전제" style="width:100%;padding:6px 8px;border:1px solid #bbb;border-radius:4px;font-size:12.5px;font-family:inherit;color:#1a1a1a;margin-bottom:0"/><button class="btn-ghost" onclick="delP(this)">✕</button>';
+  document.getElementById('premises-list').appendChild(div);
+}
+function delP(btn) {
+  btn.closest('.prow').remove();
+  reIdx();
+}
+function reIdx() {
+  var rows = document.querySelectorAll('#premises-list .prow');
+  rows.forEach(function(r,i){ r.querySelector('.pnum').textContent = 'P'+(i+1); });
+  pCount = rows.length;
+}
+
+// ── 타당성 점검
+function checkValid() {
+  var ps = [];
+  document.querySelectorAll('#premises-list .pi').forEach(function(i){ if(i.value.trim()) ps.push(i.value.trim()); });
+  var conc = document.getElementById('conclusion').value.trim();
+  var el = document.getElementById('valid-row');
+  if (!ps.length && !conc) { el.textContent = '○ 전제와 결론을 입력하면 형식 점검이 실행됩니다.'; el.style.color='#666'; return; }
+  if (!ps.length) { el.textContent = '⚠ 전제가 없습니다.'; el.style.color='#923a2a'; return; }
+  if (!conc) { el.textContent = '⚠ 결론이 비어 있습니다.'; el.style.color='#923a2a'; return; }
+  el.textContent = '✓ 전제 '+ps.length+'개, 결론 1개. 입력이 완료되었습니다.'; el.style.color='#2d6e4e';
+}
+
+// ── 기호 삽입
+function insSym(sym) {
+  Word.run(function(ctx) {
+    var r = ctx.document.getSelection();
+    r.insertText(sym, Word.InsertLocation.replace);
+    return ctx.sync().then(function() { showToast('"'+sym+'" 삽입됨'); });
+  }).catch(function(e) { showToast('오류: '+e.message); });
+}
+function filterSym(q) {
+  q = q.toLowerCase().trim();
+  document.querySelectorAll('.sg').forEach(function(g) {
+    var vis = false;
+    g.querySelectorAll('.sym').forEach(function(b) {
+      var m = !q || b.getAttribute('data-n').toLowerCase().includes(q) || b.textContent.includes(q);
+      b.style.display = m ? '' : 'none';
+      if (m) vis = true;
+    });
+    g.style.display = vis ? '' : 'none';
+  });
+}
+
+// ── 문서 스캔
+function doScan() {
+  var out = document.getElementById('scan-out');
+  out.innerHTML = '<div style="color:#666;font-size:12px;padding:8px 0">스캔 중…</div>';
+  out.style.display = 'block';
+  Word.run(function(ctx) {
+    var body = ctx.document.body;
+    var paras = body.paragraphs;
+    paras.load('items/text');
+    return ctx.sync().then(function() {
+      var items = paras.items;
+      var claims=0, premises=0, objections=0, remarks=0, replies=0;
+      var found = [];
+      items.forEach(function(p) {
+        var t = p.text;
+        if (/\[.*?\]\s*(주장|Claim)/i.test(t))     { claims++;     found.push({type:'주장', text:t}); }
+        if (/\[.*?\]\s*(전제|Premise)/i.test(t))   { premises++;   found.push({type:'전제', text:t}); }
+        if (/\[.*?\]\s*(근거|Support)/i.test(t))   {               found.push({type:'근거', text:t}); }
+        if (/\[.*?\]\s*(반론|Objection)/i.test(t)) { objections++;  found.push({type:'반론', text:t}); }
+        if (/\[.*?\]\s*(재반론|Reply)/i.test(t))   { replies++;    found.push({type:'재반론', text:t}); }
+        if (/\[.*?\]\s*(논평|Remark)/i.test(t))    { remarks++;    found.push({type:'논평', text:t}); }
+      });
+      var issues = [];
+      if (found.length===0) issues.push({cls:'warn', msg:'PhiloArgument 블록이 없습니다. 작성 탭에서 블록을 삽입하세요.'});
+      if (claims===0 && found.length>0) issues.push({cls:'err', msg:'주장(Claim) 블록이 없습니다. 논문의 핵심 주장을 명시하세요.'});
+      if (claims>0 && premises===0) issues.push({cls:'warn', msg:'주장이 있지만 전제(Premise)가 없습니다. 근거를 추가하세요.'});
+      if (objections>0 && replies<objections) issues.push({cls:'warn', msg:'반론 '+objections+'개 중 재반론이 '+replies+'개입니다. 미응답 반론을 검토하세요.'});
+      if (issues.length===0) issues.push({cls:'ok', msg:'구조적 문제가 발견되지 않았습니다.'});
+
+      var html = '<div class="scan-sum">스캔 완료 — 총 '+items.length+'개 단락<br>주장 <b>'+claims+'</b>개 | 전제 <b>'+premises+'</b>개 | 반론 <b>'+objections+'</b>개 | 논평 <b>'+remarks+'</b>개</div>';
+      issues.forEach(function(iss) {
+        var icon = iss.cls==='err'?'✕':iss.cls==='warn'?'⚠':'✓';
+        html += '<div class="iss '+iss.cls+'"><span>'+icon+'</span><span>'+iss.msg+'</span></div>';
+      });
+      out.innerHTML = html;
+    });
+  }).catch(function(e) { out.innerHTML = '<div style="color:#923a2a;font-size:12px">오류: '+e.message+'</div>'; });
+}
+
+// ── 유틸
+function showSB(msg) {
+  var sb = document.getElementById('sb');
+  document.getElementById('sb-text').textContent = msg;
+  sb.style.display = 'block';
+  setTimeout(function(){ sb.style.display='none'; }, 3000);
+}
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(function(){ t.style.display='none'; }, 1400);
+}
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
