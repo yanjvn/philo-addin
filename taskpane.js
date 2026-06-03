@@ -128,20 +128,13 @@ async function insertBlock() {
     para.spaceAfter = 6;
     para.spaceBefore = 6;
 
-    // Build the content runs
-    // Type label run (bold, colored)
-    const labelRun = para.insertText(`[${displayLabel}] ${meta.label}\n`, Word.InsertLocation.start);
-    labelRun.bold = true;
-    labelRun.font.size = 9;
-    labelRun.font.color = meta.color;
+    // Insert full text first, then apply formatting via search
+    const fullText = `[${displayLabel}] ${meta.label}  ${content}`;
+    para.insertText(fullText, Word.InsertLocation.start);
+    para.font.size = 11;
+    para.font.color = meta.color;
 
-    // Body run
-    const bodyRun = para.insertText(content, Word.InsertLocation.end);
-    bodyRun.font.color = "000000";
-    bodyRun.font.size = 11;
-    bodyRun.bold = false;
-
-    // Shading / highlight approximation using a bookmarked content control
+    // Tag with content control
     const cc = para.insertContentControl();
     cc.tag = `philo-${type}`;
     cc.title = `${meta.label} ${displayLabel}`;
@@ -151,20 +144,13 @@ async function insertBlock() {
 
     // If counterexample, add a second paragraph
     if (counterex) {
-      const cePara = para.insertParagraph("", Word.InsertLocation.after);
+      const cePara = para.insertParagraph(`⚠ 반례 메모: ${counterex}`, Word.InsertLocation.after);
       cePara.leftIndent = 36;
       cePara.spaceBefore = 0;
       cePara.spaceAfter = 8;
-
-      const ceLabel = cePara.insertText("⚠ 반례 메모: ", Word.InsertLocation.start);
-      ceLabel.bold = true;
-      ceLabel.font.size = 9;
-      ceLabel.font.color = "C49030";
-
-      const ceBody = cePara.insertText(counterex, Word.InsertLocation.end);
-      ceBody.font.size = 10;
-      ceBody.font.color = "7A5C1E";
-      ceBody.italic = true;
+      cePara.font.size = 10;
+      cePara.font.color = "7A5C1E";
+      cePara.font.italic = true;
     }
 
     await context.sync();
@@ -288,7 +274,7 @@ async function insertFormalArgument() {
     // Title paragraph (optional)
     if (title) {
       const titlePara = sel.insertParagraph(title, Word.InsertLocation.after);
-      titlePara.bold = true;
+      titlePara.font.bold = true;
       titlePara.font.size = 11;
       titlePara.spaceAfter = 4;
       titlePara.spaceBefore = 10;
@@ -297,25 +283,26 @@ async function insertFormalArgument() {
     // Premises
     premises.forEach((p, i) => {
       if (!p) return;
-      const para = sel.insertParagraph(`P${i + 1}.\t${p}`, Word.InsertLocation.after);
+      const para = sel.insertParagraph(`P${i + 1}.  ${p}`, Word.InsertLocation.after);
       para.font.size = 11;
       para.leftIndent = 24;
       para.spaceBefore = 2;
       para.spaceAfter = 2;
     });
 
-    // Separator line (via a borderBottom paragraph hack)
-    const sepPara = sel.insertParagraph("", Word.InsertLocation.after);
+    // Separator line
+    const sepPara = sel.insertParagraph("─────────────────────", Word.InsertLocation.after);
     sepPara.leftIndent = 24;
     sepPara.spaceBefore = 2;
     sepPara.spaceAfter = 2;
-    sepPara.bottomBorderVisible = true;  // Only works if borderType API available
+    sepPara.font.color = "999999";
+    sepPara.font.size = 8;
 
     // Conclusion
-    const conPara = sel.insertParagraph(`∴\t${conclusion}`, Word.InsertLocation.after);
+    const conPara = sel.insertParagraph(`∴  ${conclusion}`, Word.InsertLocation.after);
     conPara.font.size = 11;
     conPara.font.color = "2d6e4e";
-    conPara.bold = true;
+    conPara.font.bold = true;
     conPara.leftIndent = 24;
     conPara.spaceBefore = 4;
     conPara.spaceAfter = 10;
