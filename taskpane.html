@@ -231,7 +231,7 @@
 
 <script>
 // ── 상태
-var selType = null;
+var selectedBlockType = null;
 
 // ── Office 초기화
 Office.onReady(function(info) {
@@ -252,8 +252,8 @@ function goTab(id, btn) {
 function selType(el) {
   document.querySelectorAll('.btype').forEach(function(b){ b.classList.remove('on'); });
   el.classList.add('on');
-  selType = el.getAttribute('data-t');
-  var showCE = selType === 'claim' || selType === 'premise';
+  selectedBlockType = el.getAttribute('data-t');
+  var showCE = selectedBlockType === 'claim' || selectedBlockType === 'premise';
   document.getElementById('ce-section').style.display = showCE ? 'block' : 'none';
 }
 
@@ -268,13 +268,13 @@ var COLORS = {
 };
 
 function doPreview() {
-  if (!selType) { showSB('블록 유형을 먼저 선택하세요.'); return; }
+  if (!selectedBlockType) { showSB('블록 유형을 먼저 선택하세요.'); return; }
   var lbl  = document.getElementById('lbl').value.trim();
   var cont = document.getElementById('content').value.trim();
   var ce   = document.getElementById('counterex').value.trim();
   if (!cont) { showSB('내용을 입력하세요.'); return; }
-  var m = COLORS[selType];
-  var dlbl = lbl || (selType.charAt(0).toUpperCase() + '?');
+  var m = COLORS[selectedBlockType];
+  var dlbl = lbl || (selectedBlockType.charAt(0).toUpperCase() + '?');
   var html = '<div class="prev-block" style="border-color:'+m.c+';background:'+m.bg+';color:'+m.c+'">'
     + '<div class="plbl">['+dlbl+'] '+m.label+'</div>'
     + '<div style="color:#1a1a1a">'+esc(cont)+'</div>';
@@ -286,13 +286,13 @@ function doPreview() {
 
 // ── 블록 삽입
 function doInsert() {
-  if (!selType) { showSB('블록 유형을 먼저 선택하세요.'); return; }
+  if (!selectedBlockType) { showSB('블록 유형을 먼저 선택하세요.'); return; }
   var lbl  = document.getElementById('lbl').value.trim();
   var cont = document.getElementById('content').value.trim();
   var ce   = document.getElementById('counterex').value.trim();
   if (!cont) { showSB('내용을 입력하세요.'); return; }
-  var m = COLORS[selType];
-  var dlbl = lbl || (selType.charAt(0).toUpperCase() + '?');
+  var m = COLORS[selectedBlockType];
+  var dlbl = lbl || (selectedBlockType.charAt(0).toUpperCase() + '?');
   var mainText = '[' + dlbl + '] ' + m.label + '  ' + cont;
 
   Word.run(function(ctx) {
@@ -302,7 +302,7 @@ function doInsert() {
     para.spaceAfter = 2;
     para.spaceBefore = 6;
     para.font.size = 11;
-    para.font.color = m.color;
+    para.font.color = m.c.replace('#','');
     if (ce) {
       var cePara = para.insertParagraph('⚠ 반례 메모: ' + ce, Word.InsertLocation.after);
       cePara.leftIndent = 36;
