@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PhiloArgument</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <link rel="stylesheet" href="taskpane.css"/>
+</head>
+<body>
+  <div id="app">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-logo">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M6 13L10 7L14 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <line x1="7.5" y1="11" x2="12.5" y2="11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <span>PhiloArgument</span>
+      </div>
+      <nav class="tab-nav" role="tablist">
+        <button class="tab-btn active" data-tab="compose" role="tab" aria-selected="true">작성</button>
+        <button class="tab-btn" data-tab="formalize" role="tab" aria-selected="false">정식화</button>
+        <button class="tab-btn" data-tab="symbols" role="tab" aria-selected="false">기호</button>
+        <button class="tab-btn" data-tab="review" role="tab" aria-selected="false">검토</button>
+      </nav>
+    </header>
+
+    <!-- ══════════════════════════════════════
+         TAB 1: 논증 작성 (Compose)
+    ══════════════════════════════════════ -->
+    <section id="tab-compose" class="tab-panel active" role="tabpanel">
+
+      <div class="section-header">
+        <h2>논증 블록 삽입</h2>
+        <p class="section-desc">주장·근거·논평을 구조화하여 문서에 삽입합니다.</p>
+      </div>
+
+      <!-- Block type selector -->
+      <div class="block-type-grid">
+        <button class="block-type-btn" data-type="claim" title="주장 (Claim)">
+          <span class="block-dot claim-dot"></span>
+          <span class="block-label">주장</span>
+          <span class="block-sublabel">Claim</span>
+        </button>
+        <button class="block-type-btn" data-type="premise" title="전제 (Premise)">
+          <span class="block-dot premise-dot"></span>
+          <span class="block-label">전제</span>
+          <span class="block-sublabel">Premise</span>
+        </button>
+        <button class="block-type-btn" data-type="support" title="근거 (Support)">
+          <span class="block-dot support-dot"></span>
+          <span class="block-label">근거</span>
+          <span class="block-sublabel">Support</span>
+        </button>
+        <button class="block-type-btn" data-type="objection" title="반론 (Objection)">
+          <span class="block-dot objection-dot"></span>
+          <span class="block-label">반론</span>
+          <span class="block-sublabel">Objection</span>
+        </button>
+        <button class="block-type-btn" data-type="reply" title="재반론 (Reply)">
+          <span class="block-dot reply-dot"></span>
+          <span class="block-label">재반론</span>
+          <span class="block-sublabel">Reply</span>
+        </button>
+        <button class="block-type-btn" data-type="remark" title="논평 (Remark)">
+          <span class="block-dot remark-dot"></span>
+          <span class="block-label">논평</span>
+          <span class="block-sublabel">Remark</span>
+        </button>
+      </div>
+
+      <!-- Content input -->
+      <div class="compose-form">
+        <div class="form-row">
+          <label class="form-label" for="block-label-input">레이블 <span class="optional">(선택)</span></label>
+          <input type="text" id="block-label-input" class="form-input" placeholder="예: P1, C2, Obj.a …"/>
+        </div>
+        <div class="form-row">
+          <label class="form-label" for="block-content-input">내용</label>
+          <textarea id="block-content-input" class="form-textarea" rows="4" placeholder="논증의 내용을 입력하세요…"></textarea>
+        </div>
+        <!-- Counterexample memo (shown only for claim/premise) -->
+        <div class="form-row" id="counterexample-row" style="display:none">
+          <label class="form-label" for="counterexample-input">
+            반례 메모
+            <span class="badge badge-warning">검토 필요</span>
+          </label>
+          <textarea id="counterexample-input" class="form-textarea form-textarea-sm" rows="2" placeholder="예상 반례 혹은 반론을 메모하세요…"></textarea>
+        </div>
+
+        <div class="form-actions">
+          <button id="btn-insert-block" class="btn btn-primary">문서에 삽입</button>
+          <button id="btn-preview-block" class="btn btn-secondary">미리보기</button>
+        </div>
+      </div>
+
+      <!-- Preview area -->
+      <div id="block-preview" class="block-preview" style="display:none">
+        <div class="preview-label">미리보기</div>
+        <div id="preview-content"></div>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════
+         TAB 2: 정식화된 논증 (Formalize)
+    ══════════════════════════════════════ -->
+    <section id="tab-formalize" class="tab-panel" role="tabpanel">
+
+      <div class="section-header">
+        <h2>정식 논증 레이아웃</h2>
+        <p class="section-desc">P1, P2, ∴C 형식의 논증을 깔끔하게 삽입합니다.</p>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label" for="arg-title">논증 제목 <span class="optional">(선택)</span></label>
+        <input type="text" id="arg-title" class="form-input" placeholder="예: 심신 수반 논증"/>
+      </div>
+
+      <div id="premises-container">
+        <div class="premise-row" data-index="1">
+          <span class="premise-num">P1</span>
+          <input type="text" class="form-input premise-input" placeholder="첫 번째 전제"/>
+          <button class="btn-icon btn-remove-premise" title="삭제" aria-label="이 전제 삭제">✕</button>
+        </div>
+        <div class="premise-row" data-index="2">
+          <span class="premise-num">P2</span>
+          <input type="text" class="form-input premise-input" placeholder="두 번째 전제"/>
+          <button class="btn-icon btn-remove-premise" title="삭제" aria-label="이 전제 삭제">✕</button>
+        </div>
+      </div>
+
+      <button id="btn-add-premise" class="btn btn-ghost btn-sm">+ 전제 추가</button>
+
+      <div class="conclusion-row">
+        <span class="conclusion-symbol">∴</span>
+        <input type="text" id="conclusion-input" class="form-input" placeholder="결론 (conclusion)"/>
+      </div>
+
+      <!-- Subargument toggle -->
+      <details class="subarg-section">
+        <summary>보조 논증 추가</summary>
+        <div id="subarg-container">
+          <div class="form-row" style="margin-top:8px">
+            <label class="form-label">보조 논증 (어느 전제를 지지하는지 명시)</label>
+            <input type="text" class="form-input" id="subarg-for" placeholder="예: P2를 지지하는 논증"/>
+          </div>
+          <div id="subpremises-container">
+            <div class="premise-row" data-index="1">
+              <span class="premise-num">P2.1</span>
+              <input type="text" class="form-input premise-input" placeholder="보조 전제"/>
+              <button class="btn-icon btn-remove-subpremise" title="삭제" aria-label="이 전제 삭제">✕</button>
+            </div>
+          </div>
+          <button id="btn-add-subpremise" class="btn btn-ghost btn-sm">+ 보조 전제 추가</button>
+        </div>
+      </details>
+
+      <div class="validity-check-row">
+        <span class="validity-icon" id="validity-icon">○</span>
+        <span class="validity-text" id="validity-text">전제와 결론을 입력하면 형식 점검이 실행됩니다.</span>
+      </div>
+
+      <div class="form-actions">
+        <button id="btn-insert-formal" class="btn btn-primary">정식 논증 삽입</button>
+      </div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════
+         TAB 3: 기호 입력 (Symbols)
+    ══════════════════════════════════════ -->
+    <section id="tab-symbols" class="tab-panel" role="tabpanel">
+
+      <div class="section-header">
+        <h2>기호 삽입</h2>
+        <p class="section-desc">클릭하면 커서 위치에 기호가 삽입됩니다.</p>
+      </div>
+
+      <div class="symbol-search-row">
+        <input type="text" id="symbol-search" class="form-input" placeholder="기호 검색… (예: conjunction, 필연)"/>
+      </div>
+
+      <div id="symbol-groups">
+
+        <div class="symbol-group" data-group="propositional">
+          <h3 class="symbol-group-title">명제 논리</h3>
+          <div class="symbol-grid">
+            <button class="sym-btn" data-sym="¬" data-name="부정 negation">¬</button>
+            <button class="sym-btn" data-sym="∧" data-name="연언 conjunction">∧</button>
+            <button class="sym-btn" data-sym="∨" data-name="선언 disjunction">∨</button>
+            <button class="sym-btn" data-sym="→" data-name="조건 conditional implication">→</button>
+            <button class="sym-btn" data-sym="↔" data-name="쌍조건 biconditional">↔</button>
+            <button class="sym-btn" data-sym="⊃" data-name="조건 horseshoe">⊃</button>
+            <button class="sym-btn" data-sym="≡" data-name="동치 equivalence">≡</button>
+            <button class="sym-btn" data-sym="⊤" data-name="항진 tautology top">⊤</button>
+            <button class="sym-btn" data-sym="⊥" data-name="모순 contradiction bottom">⊥</button>
+            <button class="sym-btn" data-sym="⊢" data-name="증명가능 provable turnstile">⊢</button>
+            <button class="sym-btn" data-sym="⊨" data-name="의미론적 귀결 entailment models">⊨</button>
+            <button class="sym-btn" data-sym="∴" data-name="따라서 therefore conclusion">∴</button>
+            <button class="sym-btn" data-sym="∵" data-name="왜냐하면 because">∵</button>
+          </div>
+        </div>
+
+        <div class="symbol-group" data-group="predicate">
+          <h3 class="symbol-group-title">술어 논리</h3>
+          <div class="symbol-grid">
+            <button class="sym-btn" data-sym="∀" data-name="전칭 universal quantifier">∀</button>
+            <button class="sym-btn" data-sym="∃" data-name="존재 existential quantifier">∃</button>
+            <button class="sym-btn" data-sym="∄" data-name="존재하지 않음 no there is no">∄</button>
+            <button class="sym-btn" data-sym="∈" data-name="원소 element of member">∈</button>
+            <button class="sym-btn" data-sym="∉" data-name="원소 아님 not element">∉</button>
+            <button class="sym-btn" data-sym="⊆" data-name="부분집합 subset">⊆</button>
+            <button class="sym-btn" data-sym="⊂" data-name="진부분집합 proper subset">⊂</button>
+            <button class="sym-btn" data-sym="=" data-name="동일성 identity equals">＝</button>
+            <button class="sym-btn" data-sym="≠" data-name="비동일성 not equal">≠</button>
+            <button class="sym-btn" data-sym="λ" data-name="람다 lambda abstraction">λ</button>
+            <button class="sym-btn" data-sym="ι" data-name="확정기술 definite description iota">ι</button>
+          </div>
+        </div>
+
+        <div class="symbol-group" data-group="modal">
+          <h3 class="symbol-group-title">양상 논리</h3>
+          <div class="symbol-grid">
+            <button class="sym-btn" data-sym="□" data-name="필연 necessity box">□</button>
+            <button class="sym-btn" data-sym="◇" data-name="가능 possibility diamond">◇</button>
+            <button class="sym-btn" data-sym="◻" data-name="필연 necessity">◻</button>
+            <button class="sym-btn" data-sym="◈" data-name="인식적 필연 epistemic">◈</button>
+            <button class="sym-btn" data-sym="K" data-name="인식 안다 knows epistemic">K</button>
+            <button class="sym-btn" data-sym="B" data-name="믿음 believes doxastic">B</button>
+            <button class="sym-btn" data-sym="O" data-name="의무 obligation deontic">O</button>
+            <button class="sym-btn" data-sym="P" data-name="허용 permission deontic">P</button>
+            <button class="sym-btn" data-sym="F" data-name="금지 forbidden deontic">F</button>
+            <button class="sym-btn" data-sym="G" data-name="항상 always temporal">G</button>
+            <button class="sym-btn" data-sym="H" data-name="과거 항상 always past temporal">H</button>
+            <button class="sym-btn" data-sym="U" data-name="until temporal">U</button>
+          </div>
+        </div>
+
+        <div class="symbol-group" data-group="set">
+          <h3 class="symbol-group-title">집합·관계</h3>
+          <div class="symbol-grid">
+            <button class="sym-btn" data-sym="∩" data-name="교집합 intersection">∩</button>
+            <button class="sym-btn" data-sym="∪" data-name="합집합 union">∪</button>
+            <button class="sym-btn" data-sym="∅" data-name="공집합 empty set">∅</button>
+            <button class="sym-btn" data-sym="×" data-name="곱집합 cartesian product">×</button>
+            <button class="sym-btn" data-sym="℘" data-name="멱집합 power set">℘</button>
+            <button class="sym-btn" data-sym="⟨" data-name="순서쌍 left angle bracket">⟨</button>
+            <button class="sym-btn" data-sym="⟩" data-name="순서쌍 right angle bracket">⟩</button>
+            <button class="sym-btn" data-sym="↦" data-name="함수 maps to">↦</button>
+            <button class="sym-btn" data-sym="≤" data-name="이하 less equal">≤</button>
+            <button class="sym-btn" data-sym="≥" data-name="이상 greater equal">≥</button>
+            <button class="sym-btn" data-sym="≺" data-name="우선 precedence">≺</button>
+            <button class="sym-btn" data-sym="≻" data-name="우선 precedence">≻</button>
+          </div>
+        </div>
+
+        <div class="symbol-group" data-group="greek">
+          <h3 class="symbol-group-title">그리스 문자</h3>
+          <div class="symbol-grid">
+            <button class="sym-btn" data-sym="α" data-name="alpha">α</button>
+            <button class="sym-btn" data-sym="β" data-name="beta">β</button>
+            <button class="sym-btn" data-sym="γ" data-name="gamma">γ</button>
+            <button class="sym-btn" data-sym="δ" data-name="delta">δ</button>
+            <button class="sym-btn" data-sym="ε" data-name="epsilon">ε</button>
+            <button class="sym-btn" data-sym="ζ" data-name="zeta">ζ</button>
+            <button class="sym-btn" data-sym="η" data-name="eta">η</button>
+            <button class="sym-btn" data-sym="θ" data-name="theta">θ</button>
+            <button class="sym-btn" data-sym="κ" data-name="kappa">κ</button>
+            <button class="sym-btn" data-sym="μ" data-name="mu">μ</button>
+            <button class="sym-btn" data-sym="ν" data-name="nu">ν</button>
+            <button class="sym-btn" data-sym="ξ" data-name="xi">ξ</button>
+            <button class="sym-btn" data-sym="π" data-name="pi">π</button>
+            <button class="sym-btn" data-sym="ρ" data-name="rho">ρ</button>
+            <button class="sym-btn" data-sym="σ" data-name="sigma">σ</button>
+            <button class="sym-btn" data-sym="τ" data-name="tau">τ</button>
+            <button class="sym-btn" data-sym="φ" data-name="phi">φ</button>
+            <button class="sym-btn" data-sym="ψ" data-name="psi">ψ</button>
+            <button class="sym-btn" data-sym="ω" data-name="omega">ω</button>
+            <button class="sym-btn" data-sym="Γ" data-name="Gamma">Γ</button>
+            <button class="sym-btn" data-sym="Δ" data-name="Delta">Δ</button>
+            <button class="sym-btn" data-sym="Σ" data-name="Sigma">Σ</button>
+            <button class="sym-btn" data-sym="Φ" data-name="Phi">Φ</button>
+            <button class="sym-btn" data-sym="Ψ" data-name="Psi">Ψ</button>
+            <button class="sym-btn" data-sym="Ω" data-name="Omega">Ω</button>
+          </div>
+        </div>
+
+        <div class="symbol-group" data-group="special">
+          <h3 class="symbol-group-title">특수 기호</h3>
+          <div class="symbol-grid">
+            <button class="sym-btn" data-sym="⌜" data-name="quine corner left mention">⌜</button>
+            <button class="sym-btn" data-sym="⌝" data-name="quine corner right mention">⌝</button>
+            <button class="sym-btn" data-sym="‖" data-name="parallel double bar">‖</button>
+            <button class="sym-btn" data-sym="↑" data-name="uparrow nand sheffer">↑</button>
+            <button class="sym-btn" data-sym="↓" data-name="downarrow nor">↓</button>
+            <button class="sym-btn" data-sym="⊕" data-name="배타적 선언 xor exclusive">⊕</button>
+            <button class="sym-btn" data-sym="≈" data-name="근사 approximate">≈</button>
+            <button class="sym-btn" data-sym="∝" data-name="비례 proportional">∝</button>
+            <button class="sym-btn" data-sym="∞" data-name="무한 infinity">∞</button>
+            <button class="sym-btn" data-sym="′" data-name="프라임 prime">′</button>
+            <button class="sym-btn" data-sym="″" data-name="더블 프라임 double prime">″</button>
+            <button class="sym-btn" data-sym="°" data-name="도 degree">°</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Recently used -->
+      <div class="recent-symbols-row" id="recent-symbols-row" style="display:none">
+        <h3 class="symbol-group-title">최근 사용</h3>
+        <div class="symbol-grid" id="recent-symbols-grid"></div>
+      </div>
+
+      <!-- Status toast -->
+      <div id="symbol-toast" class="toast" style="display:none"></div>
+
+    </section>
+
+    <!-- ══════════════════════════════════════
+         TAB 4: 논증 검토 (Review)
+    ══════════════════════════════════════ -->
+    <section id="tab-review" class="tab-panel" role="tabpanel">
+
+      <div class="section-header">
+        <h2>논증 구조 검토</h2>
+        <p class="section-desc">문서에서 논증 블록을 스캔하여 구조를 점검합니다.</p>
+      </div>
+
+      <button id="btn-scan" class="btn btn-primary btn-full">문서 스캔</button>
+
+      <div id="scan-results" class="scan-results" style="display:none">
+
+        <div class="scan-summary" id="scan-summary"></div>
+
+        <div id="issues-list">
+          <h3 class="issues-title">발견된 문제</h3>
+          <ul id="issues-ul" class="issues-ul"></ul>
+        </div>
+
+        <div id="structure-tree">
+          <h3 class="issues-title">논증 구조</h3>
+          <div id="tree-content" class="tree-content"></div>
+        </div>
+
+      </div>
+
+    </section>
+
+  </div><!-- #app -->
+
+  <div id="status-bar" class="status-bar" style="display:none">
+    <span id="status-text"></span>
+  </div>
+
+  <script src="taskpane.js"></script>
+</body>
+</html>
